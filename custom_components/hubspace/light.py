@@ -71,13 +71,9 @@ def _add_entity(entities, hs, model, deviceClass, friendlyName, debug):
             entities.append(HubspaceTransformer(hs, friendlyName,"2",debug))
             entities.append(HubspaceTransformer(hs, friendlyName,"3",debug))
         elif model == '52133, 37833':
-            _LOGGER.debug("Creating Fan" )
-            entities.append(HubspaceFan(hs, friendlyName,debug))
             _LOGGER.debug("Creating Light" )
             entities.append(HubspaceLight(hs, friendlyName,debug))
         elif model == '76278, 37278':
-            _LOGGER.debug("Creating Fan" )
-            entities.append(HubspaceFan(hs, friendlyName,debug))
             _LOGGER.debug("Creating Light" )
             entities.append(HubspaceLight(hs, friendlyName,debug))
         elif deviceClass == 'door-lock' and model == 'TBD':
@@ -150,9 +146,7 @@ def setup_platform(
             _LOGGER.debug("friendlyName: " + friendlyName )
             _LOGGER.debug("functions: " + str(functions))
             
-            if deviceClass == 'fan':
-                entities.append(HubspaceFan(hs, friendlyName, debug, childId, model, deviceId, deviceClass))
-            elif deviceClass == 'light' or deviceClass == 'switch':
+            if deviceClass == 'light' or deviceClass == 'switch':
                 entities.append(HubspaceLight(hs, friendlyName, debug, childId, model, deviceId, deviceClass, functions))
             elif deviceClass == 'power-outlet':
                 for function in functions:
@@ -527,130 +521,6 @@ class HubspaceOutlet(LightEntity):
         This is the only method that should fetch new data for Home Assistant.
         """
         self._state = self._hs.getStateInstance(self._childId,'toggle',"outlet-" + self._outletIndex)
-        if self._debug:
-            self._debugInfo = self._hs.getDebugInfo(self._childId)
-
-class HubspaceFan(LightEntity):
-    """Representation of an Awesome Light."""
-    
-        
-    def __init__(self, hs, friendlyname, debug, childId = None, model = None, deviceId = None, deviceClass = None) -> None:
-        """Initialize an AwesomeLight."""
-        
-        if None in (childId, model, deviceId, deviceClass):
-            self._name = friendlyname + "_fan" 
-        else:
-            self._name = friendlyname
-        
-        self._debug = debug
-        self._state = 'off'
-        self._childId = childId
-        self._model = model
-        self._brightness = None
-        self._usePrimaryFunctionInstance = False
-        self._hs = hs
-        self._deviceId = deviceId
-        self._debugInfo = None
-        
-        if None in (childId, model, deviceId, deviceClass):
-            [self._childId, self._model, self._deviceId, deviceClass] = self._hs.getChildId(friendlyname)
-    
-    @property
-    def name(self) -> str:
-        """Return the display name of this light."""
-        return self._name
-    
-    @property
-    def unique_id(self) -> str:
-        """Return the display name of this light."""
-        return self._childId
-
-    @property
-    def is_on(self) -> bool | None:
-        """Return true if light is on."""
-        return self._state == 'on'
-
-    def turn_on(self, **kwargs: Any) -> None:
-        self._hs.setStateInstance(self._childId,'power','fan-power','on')
-        
-        # Homeassistant uses 0-255
-        brightness = kwargs.get(ATTR_BRIGHTNESS, self._brightness)
-        brightnessPercent = _brightness_to_hubspace(brightness)
-        if brightnessPercent < 30:
-            speed = '025'
-        elif brightnessPercent < 60:
-            speed = '050'
-        elif brightnessPercent < 85:
-            speed = '075'
-        else:
-            speed = '100'
-        speedstring = 'fan-speed-' + speed
-        
-        self._hs.setStateInstance(self._childId,'fan-speed','fan-speed',speedstring)
-        self.update()
-
-    @property
-    def color_mode(self) -> ColorMode:
-        return ColorMode.BRIGHTNESS
-
-    @property
-    def supported_color_modes(self) -> set[ColorMode]:
-        """Flag supported color modes."""
-        return {self.color_mode}
-
-    @property
-    def brightness(self) -> int or None:
-        """Return the brightness of this light between 0..255."""
-        return self._brightness
-        
-    @property
-    def extra_state_attributes(self):
-        """Return the state attributes."""
-        attr = {}
-        attr["model"]= self._model
-        if self._name.endswith("_fan"):
-            attr["deviceId"] = self._deviceId + "_fan"
-        else:
-            attr["deviceId"] = self._deviceId
-        attr["devbranch"] = False
-        
-        attr["debugInfo"] = self._debugInfo
-        
-        return attr
-        
-    def turn_off(self, **kwargs: Any) -> None:
-        """Instruct the light to turn off."""
-        self._hs.setStateInstance(self._childId,'power','fan-power','off')
-        self._hs.setStateInstance(self._childId,'fan-speed','fan-speed','fan-speed-000')
-        self.update()
-        
-    @property
-    def should_poll(self):
-        """Turn on polling """
-        return True
-        
-    def update(self) -> None:
-        """Fetch new state data for this light.
-
-        This is the only method that should fetch new data for Home Assistant.
-        """
-        self._state = self._hs.getStateInstance(self._childId,'power','fan-power')
-        fanspeed = self._hs.getStateInstance(self._childId,'fan-speed','fan-speed')
-        brightness = 0
-        
-        if fanspeed == 'fan-speed-000':
-            brightness = 0
-        elif fanspeed == 'fan-speed-025':
-            brightness = 63
-        elif fanspeed == 'fan-speed-050':
-            brightness = 127
-        elif fanspeed == 'fan-speed-075':
-            brightness = 191
-        elif fanspeed == 'fan-speed-100':
-            brightness = 255
-        self._brightness = brightness
-            
-        
         if self._debug:
             self._debugInfo = self._hs.getDebugInfo(self._childId)
 

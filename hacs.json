@@ -1,6 +1,6 @@
 {
   "name": "Hubspace-Homeassistant",
-  "domains": ["fan"],
+  "domains": ["fan", "light"],
   "iot_class": "Cloud Polling",
   "render_readme": true,
   "homeassistant": "2021.3.1"
