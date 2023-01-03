@@ -241,5 +241,8 @@ class HubspaceFan(FanEntity):
         fanspeed = self._hs.getStateInstance(self._childId,'fan-speed','fan-speed')
         self._percentage = re.search("(\d{3})$", fanspeed)
         
+        _LOGGER.debug(f"UPDATE: {self._name}")
+        _LOGGER.debug(f" State: {self._state}")
+        _LOGGER.debug(f" Percentage: {self._percentage}")
         if self._debug:
             self._debugInfo = self._hs.getDebugInfo(self._childId)
