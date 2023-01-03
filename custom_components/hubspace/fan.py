@@ -1,6 +1,7 @@
 """Platform for fan integration."""
 from __future__ import annotations
 import re
+from enum import Enum
 
 import logging
 
@@ -18,6 +19,21 @@ from datetime import timedelta
 
 # Import exceptions from the requests module
 import requests.exceptions
+
+class FanSpeed(Enum):
+    LOW = 1
+    MEDIUM = 2
+    HIGH = 3
+    MAX = 4
+    def getPercentage(self):
+        return self.value * 25
+    def toHubspaceSpeedString(self):
+        return f"fan-speed-{self.getPercentage().zfill(3)}"
+    def fromHubspaceSpeedString(cls, speedstring):
+        percentage = re.search("(\d{3})$", speedstring)
+        val = percentage / 25
+        return FanSpeed(val)
+        
 
 SCAN_INTERVAL = timedelta(seconds=60)
 BASE_INTERVAL = timedelta(seconds=60)
@@ -46,10 +62,7 @@ def _add_entity(entities, hs, model, deviceClass, friendlyName, debug):
             entities.append(HubspaceFan(hs, friendlyName,debug))
         else:
             _LOGGER.debug("skipping non-fan entities")
-
         return entities
-
-
 
 def setup_platform(
     hass: HomeAssistant,
@@ -164,12 +177,12 @@ class HubspaceFan(FanEntity):
         
         _LOGGER.debug(f" Entity Name: {self._name}")
 
-        self._supported_features = FanEntityFeature.SET_SPEED
+        self._supported_features = FanEntityFeature.SUPPORT_PRESET_MODE
         self._debug = debug
         self._state = 'off'
         self._childId = childId
         self._model = model
-        self._percentage = None
+        self._preset_modes = list(FanSpeed.__members__)
         self._usePrimaryFunctionInstance = False
         self._hs = hs
         self._deviceId = deviceId
@@ -195,15 +208,7 @@ class HubspaceFan(FanEntity):
 
     def turn_on(self, **kwargs: Any) -> None:
         self._hs.setStateInstance(self._childId,'power','fan-power','on')
-        
-        fanpercentage = kwargs.get(ATTR_PERCENTAGE, self._percentage)
-        
-        self._hs.setStateInstance(self._childId,'fan-speed','fan-speed',f"fan-speed-{fanpercentage}")
         self.update()
-
-    def set_percentage(self, percentage: int) -> None:
-        """Set the speed percentage of the fan."""
-        self._hs.setStateInstance(self._childId,'fan-speed','fan-speed',f"fan-speed-{percentage}")
 
 #     @property
 #     def extra_state_attributes(self):
@@ -219,11 +224,17 @@ class HubspaceFan(FanEntity):
 #         attr["debugInfo"] = self._debugInfo
         
 #         return attr
+
+    def set_preset_mode(self, preset_mode: str) -> None:
+        """Set the preset mode of the fan."""
+        preset_enum = FanSpeed[preset_mode]
+        self._hs.setStateInstance(self._childId,'fan-speed','fan-speed',preset_enum.toHubspaceSpeedString())
+        self.update()
+
         
     def turn_off(self, **kwargs: Any) -> None:
         """Instruct the fan to turn off."""
         self._hs.setStateInstance(self._childId,'power','fan-power','off')
-        self._hs.setStateInstance(self._childId,'fan-speed','fan-speed','fan-speed-000')
         self.update()
         
     @property
@@ -238,10 +249,10 @@ class HubspaceFan(FanEntity):
         """
         self._state = self._hs.getStateInstance(self._childId,'power','fan-power')
         fanspeed = self._hs.getStateInstance(self._childId,'fan-speed','fan-speed')
-        self._percentage = re.search("(\d{3})$", fanspeed)
+        self._preset_mode = FanSpeed.fromHubspaceSpeedString(fanspeed)
         
         _LOGGER.debug(f"UPDATE: {self._name}")
         _LOGGER.debug(f" State: {self._state}")
-        _LOGGER.debug(f" Percentage: {self._percentage}")
+        _LOGGER.debug(f" Speed: {self._preset_mode}")
         if self._debug:
             self._debugInfo = self._hs.getDebugInfo(self._childId)
