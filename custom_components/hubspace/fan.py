@@ -202,20 +202,10 @@ class HubspaceFan(FanEntity):
         self._hs.setStateInstance(self._childId,'fan-speed','fan-speed',speedstring)
         self.update()
 
-#     @property
-#     def color_mode(self) -> ColorMode:
-#         return ColorMode.BRIGHTNESS
+    def set_percentage(self, percentage: int) -> None:
+        """Set the speed percentage of the fan."""
+        self._hs.setStateInstance(self._childId,'fan-speed','fan-speed',f"fan-speed-{percentage}")
 
-#     @property
-#     def supported_color_modes(self) -> set[ColorMode]:
-#         """Flag supported color modes."""
-#         return {self.color_mode}
-
-#     @property
-#     def brightness(self) -> int or None:
-#         """Return the brightness of this light between 0..255."""
-#         return self._brightness
-        
 #     @property
 #     def extra_state_attributes(self):
 #         """Return the state attributes."""
@@ -232,7 +222,7 @@ class HubspaceFan(FanEntity):
 #         return attr
         
     def turn_off(self, **kwargs: Any) -> None:
-        """Instruct the light to turn off."""
+        """Instruct the fan to turn off."""
         self._hs.setStateInstance(self._childId,'power','fan-power','off')
         self._hs.setStateInstance(self._childId,'fan-speed','fan-speed','fan-speed-000')
         self.update()
