@@ -183,6 +183,7 @@ class HubspaceFan(FanEntity):
         self._childId = childId
         self._model = model
         self._attr_preset_modes = list(FanSpeed.__members__)
+        self._attr_speed_count = len(self._attr_preset_modes)
         self._hs = hs
         self._deviceId = deviceId
         self._debugInfo = None
@@ -254,6 +255,6 @@ class HubspaceFan(FanEntity):
         
         _LOGGER.debug(f"UPDATE: {self._name}")
         _LOGGER.debug(f" State: {self._state}")
-        _LOGGER.debug(f" Speed: {self._preset_mode}")
+        _LOGGER.debug(f" Speed: {self._attr_preset_mode}")
         if self._debug:
             self._debugInfo = self._hs.getDebugInfo(self._childId)
