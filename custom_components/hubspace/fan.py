@@ -183,7 +183,6 @@ class HubspaceFan(FanEntity):
         self._childId = childId
         self._model = model
         self._attr_preset_modes = list(FanSpeed.__members__)
-        # self._speed_count = len(self._preset_modes)
         self._hs = hs
         self._deviceId = deviceId
         self._debugInfo = None
