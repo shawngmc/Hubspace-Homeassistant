@@ -182,8 +182,8 @@ class HubspaceFan(FanEntity):
         self._state = 'off'
         self._childId = childId
         self._model = model
-        self._preset_modes = list(FanSpeed.__members__)
-        self._speed_count = len(self._preset_modes)
+        self._attr_preset_modes = list(FanSpeed.__members__)
+        # self._speed_count = len(self._preset_modes)
         self._hs = hs
         self._deviceId = deviceId
         self._debugInfo = None
@@ -251,7 +251,7 @@ class HubspaceFan(FanEntity):
         self._state = self._hs.getStateInstance(self._childId,'power','fan-power')
         fanspeed = self._hs.getStateInstance(self._childId,'fan-speed','fan-speed')
         _LOGGER.debug(f" Speed: {fanspeed}")
-        self._preset_mode = FanSpeed.fromHubspaceSpeedString(fanspeed).name
+        self._attr_preset_mode = FanSpeed.fromHubspaceSpeedString(fanspeed).name
         
         _LOGGER.debug(f"UPDATE: {self._name}")
         _LOGGER.debug(f" State: {self._state}")
