@@ -10,7 +10,7 @@ import voluptuous as vol
 
 # Import the device class from the component that you want to support
 from homeassistant.helpers import config_validation as cv, entity_platform, service
-from homeassistant.components.fan import (ATTR_PERCENTAGE, PLATFORM_SCHEMA, FanEntity, FanEntityFeature)
+from homeassistant.components.fan import (PLATFORM_SCHEMA, FanEntity, FanEntityFeature)
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -160,7 +160,6 @@ def setup_platform(
 class HubspaceFan(FanEntity):
     """Representation of an Awesome Fan."""
     
-        
     def __init__(self, hs, friendlyname, debug, childId = None, model = None, deviceId = None, deviceClass = None) -> None:
         """Initialize an AwesomeFan."""
         
@@ -184,13 +183,13 @@ class HubspaceFan(FanEntity):
         self._childId = childId
         self._model = model
         self._preset_modes = list(FanSpeed.__members__)
-        self._usePrimaryFunctionInstance = False
         self._hs = hs
         self._deviceId = deviceId
         self._debugInfo = None
         
         if None in (childId, model, deviceId, deviceClass):
             [self._childId, self._model, self._deviceId, deviceClass] = self._hs.getChildId(friendlyname)
+        self.update()
     
     @property
     def name(self) -> str:
@@ -251,7 +250,7 @@ class HubspaceFan(FanEntity):
         self._state = self._hs.getStateInstance(self._childId,'power','fan-power')
         fanspeed = self._hs.getStateInstance(self._childId,'fan-speed','fan-speed')
         _LOGGER.debug(f" Speed: {fanspeed}")
-        self._preset_mode = FanSpeed.fromHubspaceSpeedString(fanspeed)
+        self._preset_mode = FanSpeed.fromHubspaceSpeedString(fanspeed).name
         
         _LOGGER.debug(f"UPDATE: {self._name}")
         _LOGGER.debug(f" State: {self._state}")
