@@ -36,14 +36,6 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
     vol.Required(CONF_ROOMNAMES, default=[]): vol.All(cv.ensure_list, [cv.string]),
 })
 
-
-def _convert_color_temp(value):
-        if isinstance(value, str) and value.endswith('K'):
-            value = value[:-1]
-        if value is None:
-            value = 1
-        return 1000000 // int(value)
-
 def _add_entity(entities, hs, model, deviceClass, friendlyName, debug):
         if model == '52133, 37833':
             _LOGGER.debug("Creating Fan" )
@@ -119,26 +111,6 @@ def setup_platform(
             
             if deviceClass == 'fan':
                 entities.append(HubspaceFan(hs, friendlyName, debug, childId, model, deviceId, deviceClass))
-            elif deviceClass == 'light' or deviceClass == 'switch':
-                entities.append(HubspaceLight(hs, friendlyName, debug, childId, model, deviceId, deviceClass, functions))
-            elif deviceClass == 'power-outlet':
-                for function in functions:
-                    if function.get('functionClass') == 'toggle':
-                        try:
-                            _LOGGER.debug(f"Found toggle with id {function.get('id')} and instance {function.get('functionInstance')}")
-                            outletIndex = function.get('functionInstance').split('-')[1]
-                            entities.append(HubspaceOutlet(hs, friendlyName, outletIndex, debug, childId, model, deviceId, deviceClass))
-                        except IndexError:
-                            _LOGGER.debug('Error extracting outlet index')
-            elif deviceClass == 'landscape-transformer':
-                for function in functions:
-                    if function.get('functionClass') == 'toggle':
-                        try:
-                            _LOGGER.debug(f"Found toggle with id {function.get('id')} and instance {function.get('functionInstance')}")
-                            outletIndex = function.get('functionInstance').split('-')[1]
-                            entities.append(HubspaceTransformer(hs, friendlyName, outletIndex, debug, childId, model, deviceId, deviceClass))
-                        except IndexError:
-                            _LOGGER.debug('Error extracting outlet index')
     
     if not entities:
         return
@@ -179,14 +151,12 @@ class HubspaceFan(FanEntity):
         
         if None in (childId, model, deviceId, deviceClass):
             self._name = friendlyname + "_fan" 
-        else:
-            self._name = friendlyname
         
         self._debug = debug
         self._state = 'off'
         self._childId = childId
         self._model = model
-        self._brightness = None
+        self._percentage = None
         self._usePrimaryFunctionInstance = False
         self._hs = hs
         self._deviceId = deviceId
