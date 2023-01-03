@@ -30,7 +30,8 @@ class FanSpeed(Enum):
     def toHubspaceSpeedString(self):
         return f"fan-speed-{self.getPercentage().zfill(3)}"
     def fromHubspaceSpeedString(speedstring):
-        percentage = re.search("(\d{3})$", speedstring)
+        percentage_digits = re.search("(\d{3})$", speedstring).group(0)
+        percentage = int(percentage_digits)
         val = percentage / 25
         return FanSpeed(val)
         
@@ -249,6 +250,7 @@ class HubspaceFan(FanEntity):
         """
         self._state = self._hs.getStateInstance(self._childId,'power','fan-power')
         fanspeed = self._hs.getStateInstance(self._childId,'fan-speed','fan-speed')
+        _LOGGER.debug(f" Speed: {fanspeed}")
         self._preset_mode = FanSpeed.fromHubspaceSpeedString(fanspeed)
         
         _LOGGER.debug(f"UPDATE: {self._name}")
