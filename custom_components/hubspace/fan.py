@@ -9,7 +9,7 @@ import voluptuous as vol
 
 # Import the device class from the component that you want to support
 from homeassistant.helpers import config_validation as cv, entity_platform, service
-from homeassistant.components.fan import (ATTR_PERCENTAGE, PLATFORM_SCHEMA, FanEntity)
+from homeassistant.components.fan import (ATTR_PERCENTAGE, PLATFORM_SCHEMA, FanEntity, FanEntityFeature)
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -164,6 +164,7 @@ class HubspaceFan(FanEntity):
         
         _LOGGER.debug(f" Entity Name: {self._name}")
 
+        self._supported_features = FanEntityFeature.SET_SPEED
         self._debug = debug
         self._state = 'off'
         self._childId = childId
