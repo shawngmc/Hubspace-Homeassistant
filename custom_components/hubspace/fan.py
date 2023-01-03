@@ -177,7 +177,7 @@ class HubspaceFan(FanEntity):
         
         _LOGGER.debug(f" Entity Name: {self._name}")
 
-        self._supported_features = FanEntityFeature.PRESET_MODE
+        self._attr_supported_features = FanEntityFeature.PRESET_MODE
         self._debug = debug
         self._state = 'off'
         self._childId = childId
