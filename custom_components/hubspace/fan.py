@@ -1,5 +1,6 @@
 """Platform for fan integration."""
 from __future__ import annotations
+import re
 
 import logging
 
@@ -165,39 +166,29 @@ class HubspaceFan(FanEntity):
         if None in (childId, model, deviceId, deviceClass):
             [self._childId, self._model, self._deviceId, deviceClass] = self._hs.getChildId(friendlyname)
     
-#     @property
-#     def name(self) -> str:
-#         """Return the display name of this fan."""
-#         return self._name
+    @property
+    def name(self) -> str:
+        """Return the display name of this fan."""
+        return self._name
     
-#     @property
-#     def unique_id(self) -> str:
-#         """Return the display name of this fan."""
-#         return self._childId
+    @property
+    def unique_id(self) -> str:
+        """Return the display name of this fan."""
+        return self._childId
 
-#     @property
-#     def is_on(self) -> bool | None:
-#         """Return true if fan is on."""
-#         return self._state == 'on'
+    @property
+    def is_on(self) -> bool | None:
+        """Return true if fan is on."""
+        return self._state == 'on'
 
-#     def turn_on(self, **kwargs: Any) -> None:
-#         self._hs.setStateInstance(self._childId,'power','fan-power','on')
+    def turn_on(self, **kwargs: Any) -> None:
+        self._hs.setStateInstance(self._childId,'power','fan-power','on')
         
-#         # Homeassistant uses 0-255
-#         fanpercentage = kwargs.get(ATTR_PERCENTAGE, self._brightness)
-#         brightnessPercent = _brightness_to_hubspace(brightness)
-#         if brightnessPercent < 30:
-#             speed = '025'
-#         elif brightnessPercent < 60:
-#             speed = '050'
-#         elif brightnessPercent < 85:
-#             speed = '075'
-#         else:
-#             speed = '100'
-#         speedstring = 'fan-speed-' + fanpercentage
+        fanpercentage = kwargs.get(ATTR_PERCENTAGE, self._percentage)
+        speedstring = 'fan-speed-' + fanpercentage
         
-#         self._hs.setStateInstance(self._childId,'fan-speed','fan-speed',speedstring)
-#         self.update()
+        self._hs.setStateInstance(self._childId,'fan-speed','fan-speed',speedstring)
+        self.update()
 
 #     @property
 #     def color_mode(self) -> ColorMode:
@@ -228,38 +219,25 @@ class HubspaceFan(FanEntity):
         
 #         return attr
         
-#     def turn_off(self, **kwargs: Any) -> None:
-#         """Instruct the light to turn off."""
-#         self._hs.setStateInstance(self._childId,'power','fan-power','off')
-#         self._hs.setStateInstance(self._childId,'fan-speed','fan-speed','fan-speed-000')
-#         self.update()
+    def turn_off(self, **kwargs: Any) -> None:
+        """Instruct the light to turn off."""
+        self._hs.setStateInstance(self._childId,'power','fan-power','off')
+        self._hs.setStateInstance(self._childId,'fan-speed','fan-speed','fan-speed-000')
+        self.update()
         
-#     @property
-#     def should_poll(self):
-#         """Turn on polling """
-#         return True
+    @property
+    def should_poll(self):
+        """Turn on polling """
+        return True
         
-#     def update(self) -> None:
-#         """Fetch new state data for this light.
+    def update(self) -> None:
+        """Fetch new state data for this fan.
 
-#         This is the only method that should fetch new data for Home Assistant.
-#         """
-#         self._state = self._hs.getStateInstance(self._childId,'power','fan-power')
-#         fanspeed = self._hs.getStateInstance(self._childId,'fan-speed','fan-speed')
-#         brightness = 0
+        This is the only method that should fetch new data for Home Assistant.
+        """
+        self._state = self._hs.getStateInstance(self._childId,'power','fan-power')
+        fanspeed = self._hs.getStateInstance(self._childId,'fan-speed','fan-speed')
+        self._percentage = re.search("(\d{3})$", fanspeed)
         
-#         if fanspeed == 'fan-speed-000':
-#             brightness = 0
-#         elif fanspeed == 'fan-speed-025':
-#             brightness = 63
-#         elif fanspeed == 'fan-speed-050':
-#             brightness = 127
-#         elif fanspeed == 'fan-speed-075':
-#             brightness = 191
-#         elif fanspeed == 'fan-speed-100':
-#             brightness = 255
-#         self._brightness = brightness
-            
-        
-#         if self._debug:
-#             self._debugInfo = self._hs.getDebugInfo(self._childId)
+        if self._debug:
+            self._debugInfo = self._hs.getDebugInfo(self._childId)
