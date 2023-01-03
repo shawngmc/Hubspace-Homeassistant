@@ -197,9 +197,8 @@ class HubspaceFan(FanEntity):
         self._hs.setStateInstance(self._childId,'power','fan-power','on')
         
         fanpercentage = kwargs.get(ATTR_PERCENTAGE, self._percentage)
-        speedstring = 'fan-speed-' + fanpercentage
         
-        self._hs.setStateInstance(self._childId,'fan-speed','fan-speed',speedstring)
+        self._hs.setStateInstance(self._childId,'fan-speed','fan-speed',f"fan-speed-{fanpercentage}")
         self.update()
 
     def set_percentage(self, percentage: int) -> None:
