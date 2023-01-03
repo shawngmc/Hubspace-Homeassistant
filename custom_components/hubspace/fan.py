@@ -150,9 +150,20 @@ class HubspaceFan(FanEntity):
     def __init__(self, hs, friendlyname, debug, childId = None, model = None, deviceId = None, deviceClass = None) -> None:
         """Initialize an AwesomeFan."""
         
+        _LOGGER.debug("Fan Name: " )
+        _LOGGER.debug(friendlyname)
+        _LOGGER.debug(f"Friendly Name: {friendlyname}")
+        _LOGGER.debug(f" Child ID: {childId}")
+        _LOGGER.debug(f" Model: {model}")
+        _LOGGER.debug(f" Device ID: {deviceId}")
+        _LOGGER.debug(f" Device Class: {deviceClass}")
+        self._name = friendlyname
+
         if None in (childId, model, deviceId, deviceClass):
             self._name = friendlyname + "_fan" 
         
+        _LOGGER.debug(f" Entity Name: {self._name}")
+
         self._debug = debug
         self._state = 'off'
         self._childId = childId
