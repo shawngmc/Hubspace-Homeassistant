@@ -28,16 +28,27 @@ CONF_FRIENDLYNAMES: Final = "friendlynames"
 CONF_ROOMNAMES: Final = "roomnames"
 CONF_DEBUG: Final = "debug"
 
+DOMAIN = "hubspace"
+
+
 # Validation of the user's configuration
-CONFIG_SCHEMA = vol.Schema(
-    {
-        vol.Required(CONF_USERNAME): cv.string,
-        vol.Required(CONF_PASSWORD): cv.string,
-        vol.Required(CONF_DEBUG, default=False): cv.boolean,
-        vol.Required(CONF_FRIENDLYNAMES, default=[]): vol.All(cv.ensure_list, [cv.string]),
-        vol.Required(CONF_ROOMNAMES, default=[]): vol.All(cv.ensure_list, [cv.string]),
-    }
+HUBSPACE_SCHEMA = vol.All(
+    vol.Schema(
+        {
+            vol.Required(CONF_USERNAME): cv.string,
+            vol.Required(CONF_PASSWORD): cv.string,
+            vol.Required(CONF_DEBUG, default=False): cv.boolean,
+            vol.Required(CONF_FRIENDLYNAMES, default=[]): vol.All(cv.ensure_list, [cv.string]),
+            vol.Required(CONF_ROOMNAMES, default=[]): vol.All(cv.ensure_list, [cv.string]),
+        },
+        extra=vol.PREVENT_EXTRA,
+    )
 )
+
+CONFIG_SCHEMA = vol.Schema(
+    {vol.Optional(DOMAIN): HUBSPACE_SCHEMA}, extra=vol.ALLOW_EXTRA
+)
+
 
 def _add_entity(entities, hs, model, deviceClass, friendlyName, debug):
 
