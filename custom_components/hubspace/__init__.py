@@ -49,7 +49,9 @@ def setup(
 ) -> None:
     """Set up the Hubspace component."""
     if DOMAIN not in yaml_config:
-        return True
+        return False
 
-    hass.data[DOMAIN] = config[DOMAIN]
+    hass.data[DOMAIN] = yaml_config[DOMAIN]
+
+    return True
         

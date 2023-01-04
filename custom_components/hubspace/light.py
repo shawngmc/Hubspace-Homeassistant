@@ -91,7 +91,7 @@ def setup_platform(
     # The configuration check takes care they are present.
         
     username = hass.data[DOMAIN][CONF_USERNAME]
-    password = hass.data[DOMAIN](CONF_PASSWORD)
+    password = hass.data[DOMAIN][CONF_PASSWORD]
     debug = hass.data[DOMAIN][CONF_DEBUG]
     try:
         hs = HubSpace(username,password)
