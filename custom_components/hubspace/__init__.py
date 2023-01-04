@@ -91,7 +91,6 @@ def _add_entity(entities, hs, model, deviceClass, friendlyName, debug):
 def setup(
     hass: HomeAssistant,
     config: ConfigType,
-    add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up the Hubspace component."""
     
@@ -169,8 +168,6 @@ def setup(
     
     if not entities:
         return
-    add_entities(entities)
-    
     
     def my_service(call: ServiceCall) -> None:
         """My first service."""
