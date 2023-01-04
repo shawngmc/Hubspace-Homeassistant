@@ -98,6 +98,7 @@ def setup(
     # Rescope config to just the domain
     config = config[DOMAIN]
 
+        _LOGGER.debug("config " + config )
     # Assign configuration variables.
     # The configuration check takes care they are present.
     username = config[CONF_USERNAME]
