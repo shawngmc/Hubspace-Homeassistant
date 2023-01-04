@@ -169,7 +169,7 @@ def setup(
                             _LOGGER.debug('Error extracting outlet index')
     
     if not entities:
-        return
+        return True
     
     def my_service(call: ServiceCall) -> None:
         """My first service."""
@@ -194,3 +194,5 @@ def setup(
 
     # Register our service with Home Assistant.
     hass.services.register("hubspace", 'send_command', my_service)
+
+    return True
