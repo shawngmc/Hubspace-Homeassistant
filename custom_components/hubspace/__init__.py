@@ -94,9 +94,11 @@ def setup(
 ) -> None:
     """Set up the Hubspace component."""
     
+    # Rescope config to just the domain
+    config = config[DOMAIN]
+
     # Assign configuration variables.
     # The configuration check takes care they are present.
-        
     username = config[CONF_USERNAME]
     password = config.get(CONF_PASSWORD)
     debug = config.get(CONF_DEBUG)
