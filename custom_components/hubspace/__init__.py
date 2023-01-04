@@ -29,13 +29,15 @@ CONF_ROOMNAMES: Final = "roomnames"
 CONF_DEBUG: Final = "debug"
 
 # Validation of the user's configuration
-CONFIG_SCHEMA = {
-    vol.Required(CONF_USERNAME): cv.string,
-    vol.Required(CONF_PASSWORD): cv.string,
-    vol.Required(CONF_DEBUG, default=False): cv.boolean,
-    vol.Required(CONF_FRIENDLYNAMES, default=[]): vol.All(cv.ensure_list, [cv.string]),
-    vol.Required(CONF_ROOMNAMES, default=[]): vol.All(cv.ensure_list, [cv.string]),
-}
+CONFIG_SCHEMA = vol.Schema(
+    {
+        vol.Required(CONF_USERNAME): cv.string,
+        vol.Required(CONF_PASSWORD): cv.string,
+        vol.Required(CONF_DEBUG, default=False): cv.boolean,
+        vol.Required(CONF_FRIENDLYNAMES, default=[]): vol.All(cv.ensure_list, [cv.string]),
+        vol.Required(CONF_ROOMNAMES, default=[]): vol.All(cv.ensure_list, [cv.string]),
+    }
+)
 
 def _add_entity(entities, hs, model, deviceClass, friendlyName, debug):
 
