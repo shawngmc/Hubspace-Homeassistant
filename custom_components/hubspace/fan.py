@@ -6,6 +6,7 @@ from enum import Enum
 import logging
 
 from .hubspace import HubSpace
+from .const import DOMAIN
 import voluptuous as vol
 
 # Import the device class from the component that you want to support
@@ -41,6 +42,113 @@ BASE_INTERVAL = timedelta(seconds=60)
 
 _LOGGER = logging.getLogger(__name__)
 
+CONF_FRIENDLYNAMES: Final = "friendlynames"
+CONF_ROOMNAMES: Final = "roomnames"
+CONF_DEBUG: Final = "debug"
+
+def _add_entity(entities, hs, model, deviceClass, friendlyName, debug):
+        if model == '52133, 37833':
+            _LOGGER.debug("Creating Fan" )
+            entities.append(HubspaceFan(hs, friendlyName,debug))
+        elif model == '76278, 37278':
+            _LOGGER.debug("Creating Fan" )
+            entities.append(HubspaceFan(hs, friendlyName,debug))
+        else:
+            _LOGGER.debug("skipping non-fan entities")
+        return entities
+
+def setup_platform(
+    hass: HomeAssistant,
+    config: ConfigType,
+    add_entities: AddEntitiesCallback,
+    discovery_info: DiscoveryInfoType | None = None
+) -> None:
+    """Set up the Awesome Fan platform."""
+    
+    # Assign configuration variables.
+    # The configuration check takes care they are present.
+        
+    username = hass.data[DOMAIN][CONF_USERNAME]
+    password = hass.data[DOMAIN][CONF_PASSWORD]
+    debug = hass.data[DOMAIN][CONF_DEBUG]
+    try:
+        hs = HubSpace(username,password)
+    except requests.exceptions.ReadTimeout as ex:
+        raise PlatformNotReady(f"Connection error while connecting to hubspace: {ex}") from ex
+    
+    entities = []
+    for friendlyName in hass.data[DOMAIN][CONF_FRIENDLYNAMES]:
+
+        _LOGGER.debug("friendlyName " + friendlyName )
+        [childId, model, deviceId, deviceClass] = hs.getChildId(friendlyName)
+
+        _LOGGER.debug("Switch on Model " + model )
+        _LOGGER.debug("childId: " + childId )
+        _LOGGER.debug("deviceId: " + deviceId )
+        _LOGGER.debug("deviceClass: " + deviceClass )
+        
+        entities = _add_entity(entities, hs, model, deviceClass, friendlyName, debug)
+
+    for roomName in hass.data[DOMAIN][CONF_ROOMNAMES]:
+
+        _LOGGER.debug("roomName " + roomName )
+        children = hs.getChildrenFromRoom(roomName)
+
+        for childId in children:
+
+            _LOGGER.debug("childId " + childId )
+            [childId, model, deviceId, deviceClass, friendlyName] = hs.getChildInfoById(childId)
+
+            _LOGGER.debug("Switch on Model " + model )
+            _LOGGER.debug("deviceId: " + deviceId )
+            _LOGGER.debug("deviceClass: " + deviceClass )
+            _LOGGER.debug("friendlyName: " + friendlyName )
+
+            entities = _add_entity(entities, hs, model, deviceClass, friendlyName, debug)
+    
+    if hass.data[DOMAIN][CONF_FRIENDLYNAMES] == [] and hass.data[DOMAIN][CONF_ROOMNAMES] == []:
+        _LOGGER.debug('Attempting automatic discovery')
+        for [childId, model, deviceId, deviceClass, friendlyName, functions] in hs.discoverDeviceIds():
+            _LOGGER.debug("childId " + childId )
+            _LOGGER.debug("Switch on Model " + model )
+            _LOGGER.debug("deviceId: " + deviceId )
+            _LOGGER.debug("deviceClass: " + deviceClass )
+            _LOGGER.debug("friendlyName: " + friendlyName )
+            _LOGGER.debug("functions: " + str(functions))
+            
+            if deviceClass == 'fan':
+                entities.append(HubspaceFan(hs, friendlyName, debug, childId, model, deviceId, deviceClass))
+    
+    if not entities:
+        return
+    add_entities(entities)
+    
+    
+    def my_service(call: ServiceCall) -> None:
+        """My first service."""
+        _LOGGER.info("Received data" +  str(call.data))
+        
+        entity_ids = call.data['entity_id']       
+        functionClass = call.data['functionClass']
+        value = call.data['value']
+        
+        if 'functionInstance' in call.data:
+            functionInstance = call.data['functionInstance']
+        else:
+            functionInstance = None
+        
+        for entity_id in entity_ids:
+            _LOGGER.info("entity_id: " + str(entity_id))
+            for i in entities:
+                if i.entity_id == entity_id:
+                    _LOGGER.info("Found Entity")
+                    i.send_command(functionClass,value,functionInstance)
+            
+
+    # Register our service with Home Assistant.
+    hass.services.register("hubspace", 'send_command', my_service)
+    
+        
 class HubspaceFan(FanEntity):
     """Representation of an Awesome Fan."""
     
@@ -95,20 +203,20 @@ class HubspaceFan(FanEntity):
         self._hs.setStateInstance(self._childId,'power','fan-power','on')
         self.update()
 
-#     @property
-#     def extra_state_attributes(self):
-#         """Return the state attributes."""
-#         attr = {}
-#         attr["model"]= self._model
-#         if self._name.endswith("_fan"):
-#             attr["deviceId"] = self._deviceId + "_fan"
-#         else:
-#             attr["deviceId"] = self._deviceId
-#         attr["devbranch"] = False
+    @property
+    def extra_state_attributes(self):
+        """Return the state attributes."""
+        attr = {}
+        attr["model"]= self._model
+        if self._name.endswith("_fan"):
+            attr["deviceId"] = self._deviceId + "_fan"
+        else:
+            attr["deviceId"] = self._deviceId
+        attr["devbranch"] = False
         
-#         attr["debugInfo"] = self._debugInfo
+        attr["debugInfo"] = self._debugInfo
         
-#         return attr
+        return attr
 
     def set_preset_mode(self, preset_mode: str) -> None:
         """Set the preset mode of the fan."""
