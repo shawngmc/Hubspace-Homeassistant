@@ -10,7 +10,7 @@ import voluptuous as vol
 from .fan import HubspaceFan
 from .light import HubspaceLight, HubspaceLock, HubspaceOutlet, HubspaceTransformer
 from homeassistant.helpers import config_validation as cv, entity_platform, service
-from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
+from homeassistant.const import CONF_PASSWORD, CONF_USERNAME, Platform
 from homeassistant.core import HomeAssistant, ServiceCall
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.typing import ConfigType, DiscoveryInfoType
@@ -28,8 +28,9 @@ CONF_FRIENDLYNAMES: Final = "friendlynames"
 CONF_ROOMNAMES: Final = "roomnames"
 CONF_DEBUG: Final = "debug"
 
-DOMAIN = "hubspace"
+from .const import DOMAIN
 
+PLATFORMS: list[Platform] = [Platform.FAN, Platform.LIGHT]
 
 # Validation of the user's configuration
 HUBSPACE_SCHEMA = vol.All(
