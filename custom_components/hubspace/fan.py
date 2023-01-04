@@ -29,7 +29,7 @@ class FanSpeed(Enum):
     def getPercentage(self):
         return self.value * 25
     def toHubspaceSpeedString(self):
-        return f"fan-speed-{self.getPercentage().zfill(3)}"
+        return f"fan-speed-{str(self.getPercentage()).zfill(3)}"
     def fromHubspaceSpeedString(speedstring):
         percentage_digits = re.search("(\d{3})$", speedstring).group(0)
         percentage = int(percentage_digits)
