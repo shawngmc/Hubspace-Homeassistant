@@ -30,7 +30,8 @@ async def validate_input(hass: HomeAssistant, data: dict[str, Any]) -> None:
     """
     try:
         hs = HubSpace(data[CONF_USERNAME], data[CONF_PASSWORD])
-    except ex:
+        hs.getAccountId()
+    except Exception as ex:
         _LOGGER.warning(ex)
         raise ex
 
