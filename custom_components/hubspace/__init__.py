@@ -7,8 +7,8 @@ from .hubspace import HubSpace
 import voluptuous as vol
 
 # Import the device class from the component that you want to support
-from fan import HubspaceFan
-from light import HubspaceLight, HubspaceLock, HubspaceOutlet, HubspaceTransformer
+from .fan import HubspaceFan
+from .light import HubspaceLight, HubspaceLock, HubspaceOutlet, HubspaceTransformer
 from homeassistant.helpers import config_validation as cv, entity_platform, service
 from homeassistant.const import CONF_PASSWORD, CONF_USERNAME
 from homeassistant.core import HomeAssistant, ServiceCall
@@ -29,7 +29,7 @@ CONF_ROOMNAMES: Final = "roomnames"
 CONF_DEBUG: Final = "debug"
 
 # Validation of the user's configuration
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend({
+CONFIG_SCHEMA.extend({
     vol.Required(CONF_USERNAME): cv.string,
     vol.Required(CONF_PASSWORD): cv.string,
     vol.Required(CONF_DEBUG, default=False): cv.boolean,
