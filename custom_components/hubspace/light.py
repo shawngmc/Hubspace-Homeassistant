@@ -161,7 +161,7 @@ def setup_platform(
     
     if not entities:
         return
-    add_entities(entities)
+    add_entities(entities, True)
     
     
     def my_service(call: ServiceCall) -> None:
